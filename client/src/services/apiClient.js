@@ -1,6 +1,22 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+// Normalize base URL to ensure /api/v1 prefix is always guaranteed
+const resolveBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl || envUrl.trim() === '') {
+    return '/api/v1';
+  }
+  const trimmed = envUrl.trim().replace(/\/+$/, '');
+  if (trimmed.endsWith('/api/v1')) {
+    return trimmed;
+  }
+  if (trimmed.endsWith('/api')) {
+    return `${trimmed}/v1`;
+  }
+  return `${trimmed}/api/v1`;
+};
+
+const baseURL = resolveBaseURL();
 
 export const apiClient = axios.create({
   baseURL,
