@@ -51,7 +51,7 @@ export const authService = {
   },
 
   setAuthCookie(res, token) {
-    const isProd = env.NODE_ENV === 'production';
+    const isProd = env.NODE_ENV === 'production' || process.env.RENDER === 'true';
     res.cookie('token', token, {
       httpOnly: true,
       secure: env.COOKIE_SECURE ?? isProd,
@@ -62,7 +62,7 @@ export const authService = {
   },
 
   clearAuthCookie(res) {
-    const isProd = env.NODE_ENV === 'production';
+    const isProd = env.NODE_ENV === 'production' || process.env.RENDER === 'true';
     res.cookie('token', '', {
       httpOnly: true,
       secure: env.COOKIE_SECURE ?? isProd,

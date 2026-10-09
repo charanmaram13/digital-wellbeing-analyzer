@@ -26,6 +26,23 @@ export const apiClient = axios.create({
   },
 });
 
+// Request interceptor: attach bearer token if available
+apiClient.interceptors.request.use(
+  (config) => {
+    try {
+      const token =
+        localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (e) {
+      // Ignore storage access errors in private/sandboxed modes
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 apiClient.interceptors.response.use(
   (response) => {
     return response.data;

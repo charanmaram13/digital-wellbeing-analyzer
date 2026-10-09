@@ -26,6 +26,11 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       const data = await authApi.login(credentials);
+      if (data && data.token) {
+        try {
+          localStorage.setItem('auth_token', data.token);
+        } catch (e) {}
+      }
       setUser(data.user);
       return data.user;
     } catch (err) {
@@ -38,6 +43,11 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       const data = await authApi.register(userData);
+      if (data && data.token) {
+        try {
+          localStorage.setItem('auth_token', data.token);
+        } catch (e) {}
+      }
       setUser(data.user);
       return data.user;
     } catch (err) {
@@ -52,6 +62,10 @@ export function AuthProvider({ children }) {
     } catch (err) {
       // Continue client logout
     } finally {
+      try {
+        localStorage.removeItem('auth_token');
+        sessionStorage.removeItem('auth_token');
+      } catch (e) {}
       setUser(null);
     }
   };

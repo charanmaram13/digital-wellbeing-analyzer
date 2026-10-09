@@ -6,7 +6,7 @@ export const authController = {
     try {
       const { user, token } = await authService.register(req.body);
       authService.setAuthCookie(res, token);
-      return ApiResponse.success(res, 201, { user });
+      return ApiResponse.success(res, 201, { user, token });
     } catch (error) {
       next(error);
     }
@@ -16,7 +16,7 @@ export const authController = {
     try {
       const { user, token } = await authService.login(req.body);
       authService.setAuthCookie(res, token);
-      return ApiResponse.success(res, 200, { user });
+      return ApiResponse.success(res, 200, { user, token });
     } catch (error) {
       next(error);
     }
