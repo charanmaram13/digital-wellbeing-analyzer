@@ -13,8 +13,9 @@ import { CATEGORY_COLORS, formatMinutesToHours } from '../../utils/formatters.js
 export function TopAppsBarChart({ data = [], height = 240 }) {
   if (!data || data.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-slate-500 text-sm">
-        No application usage logged yet.
+      <div className="h-48 flex flex-col items-center justify-center text-slate-500 text-sm gap-1">
+        <p>No application usage logged yet.</p>
+        <span className="text-xs text-slate-600">Track activity to view your top applications</span>
       </div>
     );
   }

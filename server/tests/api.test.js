@@ -130,16 +130,72 @@ Slack,Communication,2026-10-09,45,13:00`; // duplicate inside file
     expect(res.body.data.rejectedCount).toBe(1); // duplicate inside file flagged
   });
 
-  it('GET /api/v1/analytics/overview returns calculated scores and patterns', async () => {
+  it('GET /api/v1/analytics/overview returns valid empty baseline for newly registered user with zero records', async () => {
+    // user2 is a newly registered user with 0 screen time records
+    const res = await request(app)
+      .get('/api/v1/analytics/overview')
+      .set('Cookie', [`token=${user2Token}`]);
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.hasData).toBe(false);
+    expect(res.body.data.totalRecordsCount).toBe(0);
+    expect(res.body.data.score).toBe(100);
+    expect(res.body.data.today.totalMinutes).toBe(0);
+    expect(res.body.data.today.goalMinutes).toBe(360);
+    expect(res.body.data.topApps).toEqual([]);
+    expect(res.body.data.topCategories).toEqual([]);
+    expect(res.body.data.patterns).toEqual([]);
+    expect(res.body.data.currentWindowRange).toBeDefined();
+    expect(res.body.data.currentWindowRange.start).toBeDefined();
+    expect(res.body.data.currentWindowRange.end).toBeDefined();
+    expect(res.body.data.settings).toBeDefined();
+    expect(res.body.data.settings.dailyScreenTimeGoalMinutes).toBe(360);
+    expect(res.body.data.settings.bedtime).toBe('23:00');
+  });
+
+  it('GET /api/v1/analytics detailed endpoints succeed with safe defaults for user with no records', async () => {
+    const [dailyRes, weeklyRes, catRes, patternRes, scoreRes] = await Promise.all([
+      request(app).get('/api/v1/analytics/daily').set('Cookie', [`token=${user2Token}`]),
+      request(app).get('/api/v1/analytics/weekly').set('Cookie', [`token=${user2Token}`]),
+      request(app).get('/api/v1/analytics/categories').set('Cookie', [`token=${user2Token}`]),
+      request(app).get('/api/v1/analytics/patterns').set('Cookie', [`token=${user2Token}`]),
+      request(app).get('/api/v1/analytics/wellbeing-score').set('Cookie', [`token=${user2Token}`]),
+    ]);
+
+    expect(dailyRes.status).toBe(200);
+    expect(dailyRes.body.data.dailyAggregates).toEqual([]);
+    expect(dailyRes.body.data.goalMinutes).toBe(360);
+
+    expect(weeklyRes.status).toBe(200);
+    expect(weeklyRes.body.data.currentWeek.totalMinutes).toBe(0);
+    expect(weeklyRes.body.data.previousWeek.totalMinutes).toBe(0);
+
+    expect(catRes.status).toBe(200);
+    expect(catRes.body.data).toEqual([]);
+
+    expect(patternRes.status).toBe(200);
+    expect(patternRes.body.data).toEqual([]);
+
+    expect(scoreRes.status).toBe(200);
+    expect(scoreRes.body.data.score).toBe(100);
+    expect(scoreRes.body.data.classification.status).toBe('Balanced');
+  });
+
+  it('GET /api/v1/analytics/overview returns calculated scores and patterns for existing user with records', async () => {
     const res = await request(app)
       .get('/api/v1/analytics/overview')
       .set('Cookie', [`token=${user1Token}`]);
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
+    expect(res.body.data.hasData).toBe(true);
+    expect(res.body.data.totalRecordsCount).toBeGreaterThan(0);
     expect(res.body.data.score).toBeDefined();
     expect(res.body.data.classification).toBeDefined();
     expect(res.body.data.scoreBreakdown).toBeDefined();
+    expect(res.body.data.topApps.length).toBeGreaterThan(0);
+    expect(res.body.data.currentWindowRange.start).toBeDefined();
   });
 
   it('POST /api/v1/insights/generate generates deterministic insights when AI fallback runs', async () => {

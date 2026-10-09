@@ -43,11 +43,8 @@ export function computeBaselineComparison({ currentTotal, previousTotal, current
 /**
  * Splits records into current window (last N days) and previous window (prior N days).
  */
-export function splitIntoWindows(records, windowDays = 7, referenceDateStr = null) {
-  if (!Array.isArray(records) || records.length === 0) {
-    return { currentWindow: [], previousWindow: [] };
-  }
-
+export function splitIntoWindows(records = [], windowDays = 7, referenceDateStr = null) {
+  const safeRecords = Array.isArray(records) ? records : [];
   const refDate = referenceDateStr ? new Date(referenceDateStr) : new Date();
   
   // Format reference as YYYY-MM-DD
@@ -66,8 +63,8 @@ export function splitIntoWindows(records, windowDays = 7, referenceDateStr = nul
   prevEnd.setDate(prevEnd.getDate() - 1);
   const prevEndStr = prevEnd.toISOString().split('T')[0];
 
-  const currentWindow = records.filter((r) => r.date >= currentStartStr && r.date <= refIso);
-  const previousWindow = records.filter((r) => r.date >= prevStartStr && r.date <= prevEndStr);
+  const currentWindow = safeRecords.filter((r) => r && r.date >= currentStartStr && r.date <= refIso);
+  const previousWindow = safeRecords.filter((r) => r && r.date >= prevStartStr && r.date <= prevEndStr);
 
   return {
     currentWindow,

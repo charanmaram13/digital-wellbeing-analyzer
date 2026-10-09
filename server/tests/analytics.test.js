@@ -119,6 +119,44 @@ describe('Baseline Calculator', () => {
     expect(res.status).toBe('new_usage');
     expect(res.hasSufficientBaseline).toBe(false);
   });
+
+  it('splitIntoWindows returns valid ranges and empty arrays for brand new user with 0 records', () => {
+    const res = splitIntoWindows([], 7, '2026-10-10');
+    expect(res.currentWindow).toEqual([]);
+    expect(res.previousWindow).toEqual([]);
+    expect(res.currentWindowRange).toBeDefined();
+    expect(res.currentWindowRange.start).toBe('2026-10-04');
+    expect(res.currentWindowRange.end).toBe('2026-10-10');
+    expect(res.previousWindowRange).toBeDefined();
+    expect(res.previousWindowRange.start).toBe('2026-09-27');
+    expect(res.previousWindowRange.end).toBe('2026-10-03');
+  });
+
+  it('splitIntoWindows safely handles null or undefined records input without crashing', () => {
+    const resNull = splitIntoWindows(null, 7, '2026-10-10');
+    expect(resNull.currentWindow).toEqual([]);
+    expect(resNull.previousWindow).toEqual([]);
+    expect(resNull.currentWindowRange.start).toBe('2026-10-04');
+    expect(resNull.currentWindowRange.end).toBe('2026-10-10');
+
+    const resUndefined = splitIntoWindows(undefined, 7, '2026-10-10');
+    expect(resUndefined.currentWindow).toEqual([]);
+    expect(resUndefined.currentWindowRange.start).toBe('2026-10-04');
+  });
+
+  it('splitIntoWindows correctly partitions populated records into current and previous windows', () => {
+    const records = [
+      { date: '2026-10-10', durationMinutes: 60 },
+      { date: '2026-10-05', durationMinutes: 45 },
+      { date: '2026-10-02', durationMinutes: 90 },
+      { date: '2026-09-20', durationMinutes: 30 }, // older than previous window
+    ];
+    const res = splitIntoWindows(records, 7, '2026-10-10');
+    expect(res.currentWindow).toHaveLength(2);
+    expect(res.previousWindow).toHaveLength(1);
+    expect(res.currentWindow.map((r) => r.date)).toEqual(['2026-10-10', '2026-10-05']);
+    expect(res.previousWindow[0].date).toBe('2026-10-02');
+  });
 });
 
 describe('Pattern Detector', () => {

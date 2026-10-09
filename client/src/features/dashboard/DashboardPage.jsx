@@ -27,6 +27,8 @@ import {
   TrendingUp,
   TrendingDown,
   Layers,
+  Upload,
+  Plus,
 } from 'lucide-react';
 
 export function DashboardPage() {
@@ -141,19 +143,64 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Demo Banner if active */}
-      <DemoBanner
-        onOpenImport={() => setIsImportModalOpen(true)}
-        onOpenAdd={openAddModal}
-      />
+      {/* Onboarding Welcome / Empty State for brand-new users or Demo Banner for users with data */}
+      {!hasData ? (
+        <div
+          data-testid="new-user-empty-state"
+          className="rounded-2xl p-6 bg-gradient-to-r from-emerald-950/40 via-slate-900 to-indigo-950/40 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 shadow-lg shadow-emerald-950/10"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-base font-bold text-white flex items-center gap-2">
+                Welcome to Digital Wellbeing Analyzer!
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase tracking-wider">
+                  New Account
+                </span>
+              </h4>
+              <p className="text-xs text-slate-300 mt-1 max-w-xl">
+                No screen-time data has been recorded yet. Log your first activity or import a CSV data export to start analyzing your habits and generating AI insights.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+            <Button
+              onClick={() => setIsImportModalOpen(true)}
+              size="sm"
+              variant="secondary"
+              className="text-xs w-full sm:w-auto"
+            >
+              <Upload className="w-3.5 h-3.5 mr-1.5" />
+              Import CSV
+            </Button>
+            <Button
+              onClick={openAddModal}
+              size="sm"
+              variant="primary"
+              className="text-xs w-full sm:w-auto"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
+              Log First Entry
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <DemoBanner
+          onOpenImport={() => setIsImportModalOpen(true)}
+          onOpenAdd={openAddModal}
+        />
+      )}
 
       {/* 6 Key Dashboard Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {/* 1. Screen Time Today */}
         <MetricCard
           title="Screen Time Today"
-          value={formatMinutesToHours(today.totalMinutes)}
-          subvalue={`Goal: ${formatMinutesToHours(today.goalMinutes)}`}
+          value={formatMinutesToHours(today.totalMinutes || 0)}
+          subvalue={`Goal: ${formatMinutesToHours(today.goalMinutes || 360)}`}
           icon={Clock}
           color={today.isOverGoal ? 'rose' : 'emerald'}
           trend={
@@ -166,7 +213,7 @@ export function DashboardPage() {
         {/* 2. Daily Average */}
         <MetricCard
           title="7-Day Daily Avg"
-          value={formatMinutesToHours(dailyAverageMinutes)}
+          value={formatMinutesToHours(dailyAverageMinutes || 0)}
           subvalue="Across recent 7 days"
           icon={Calendar}
           color="violet"
@@ -191,8 +238,8 @@ export function DashboardPage() {
           value={`${today.progressPercent || 0}%`}
           subvalue={
             today.isOverGoal
-              ? `Exceeded by ${today.totalMinutes - today.goalMinutes}m`
-              : `${today.goalMinutes - (today.totalMinutes || 0)}m remaining`
+              ? `Exceeded by ${(today.totalMinutes || 0) - (today.goalMinutes || 360)}m`
+              : `${Math.max(0, (today.goalMinutes || 360) - (today.totalMinutes || 0))}m remaining`
           }
           icon={Target}
           color={today.isOverGoal ? 'rose' : 'amber'}

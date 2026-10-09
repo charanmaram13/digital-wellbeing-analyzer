@@ -10,12 +10,15 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { formatMinutesToHours, formatDate } from '../../utils/formatters.js';
+import { Clock } from 'lucide-react';
 
 export function DailyTrendChart({ data = [], goalMinutes = 360, height = 280 }) {
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-slate-500 text-sm">
-        No daily records logged for this period.
+      <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
+        <Clock className="w-8 h-8 text-slate-600 mb-1" />
+        <p>No daily records logged for this period.</p>
+        <span className="text-xs text-slate-600">Log entries or import a CSV to view trends</span>
       </div>
     );
   }

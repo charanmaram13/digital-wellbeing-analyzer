@@ -41,4 +41,17 @@ describe('Frontend Component & Formatter Unit Tests', () => {
     expect(screen.getByText('3h 45m')).toBeInTheDocument();
     expect(screen.getByText('Goal: 6h')).toBeInTheDocument();
   });
+
+  it('renders MetricCard with zero values for new user without error', () => {
+    render(
+      <MetricCard
+        title="Screen Time Today"
+        value="0m"
+        subvalue="Goal: 6h"
+        color="emerald"
+      />
+    );
+    expect(screen.getByText('Screen Time Today')).toBeInTheDocument();
+    expect(screen.getByText('0m')).toBeInTheDocument();
+  });
 });
